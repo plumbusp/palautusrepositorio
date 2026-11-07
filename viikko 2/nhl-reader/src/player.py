@@ -6,6 +6,6 @@ class Player:
         self.goals = player_data['goals']
         self.team = player_data['team']
         self.games = player_data['games']
-    
+
     def __str__(self):
         return self.name
