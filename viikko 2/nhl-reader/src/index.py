@@ -1,7 +1,7 @@
 import requests
-from rich.prompt import Prompt
-from rich.table import Table
 from rich.console import Console
+from rich.prompt import IntPrompt, Prompt
+from rich.table import Table
 from player import Player
 
 
@@ -16,15 +16,31 @@ class PlayerStats:
     def __init__(self, players: list[Player]):
         self.players = players
 
+    def top_scorers_by_team(self, team: str) -> list[Player]:
+        """Return a team's players ordered by goals scored."""
+        return sorted(
+            (player for player in self.players if player.team == team),
+            key=lambda player: player.goals,
+            reverse=True
+        )
+
+    def top_goal_scorers(self, how_many):
+        """Palauttaa pelaajat maalimäärän mukaan laskevassa järjestyksessä."""
+        return sorted(
+            self.players,
+            key=lambda player: player.goals,
+            reverse=True
+        )[:how_many]
+
     def top_scorers_by_nationality(
-        self, nationality: str, season: str
+        self, nationality: str, season: str, how_many: int
     ) -> None:
         selected_players = sorted(
             (player for player in self.players
              if player.nationality == nationality),
             key=lambda player: player.goals + player.assists,
             reverse=True,
-        )
+        )[:how_many]
         table = Table(
             title=(
                 f"Season {season} - Top Scorers by Nationality: "
@@ -58,6 +74,7 @@ def main() -> None:
             "Nationality [USA/FIN/CAN/SWE/CZE/RUS/SLO/FRA/GBR/SVK/"
             "DEN/NED/AUT/BLR/GER/SUI/NOR/UZB/LAT/AUS] ():"
         )
+        how_many = IntPrompt.ask("How many players should be shown?", default=10)
         player_reader = PlayerReader()
 
         players = player_reader.get_players(
@@ -65,7 +82,9 @@ def main() -> None:
         )
 
         player_stats = PlayerStats(players)
-        player_stats.top_scorers_by_nationality(nationality, season)
+        player_stats.top_scorers_by_nationality(
+            nationality, season, how_many
+        )
 
 
 if __name__ == "__main__":
